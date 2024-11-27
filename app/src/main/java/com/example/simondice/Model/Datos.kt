@@ -10,11 +10,11 @@ object Datos {
     val counter = mutableIntStateOf(0)
     val secuencia = mutableListOf<Int>()
     val playerGuess = mutableListOf<Int>()
-    val historico = mutableIntStateOf(0)
+    val current = mutableStateOf(false)
 }
 
 // Colores con ID para botones
-enum class Colors(val id: Int, val nombre: String, val color: Color, val colorPressed: Color) {
+enum class Colores(val id: Int, val nombre: String, val color: Color, val colorPressed: Color) {
     // Rojos
     RED(0, "Red", Color(0xFFE57373), Color(0xFFB71C1C)),
     // Azules
