@@ -10,6 +10,7 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Text
@@ -91,6 +92,7 @@ fun StartButton(myViewModel: MyViewModel) {
             enabled = estado,
             onClick = {
                 // Lógica del botón
+                myViewModel.generarNuevaSecuencia()
             },
             modifier = Modifier
                 .padding(20.dp) // Más espacio alrededor del botón
@@ -148,19 +150,27 @@ fun BotoNormal(
     Button(
         enabled = estado, // Estado del botón (activo/inactivo)
         onClick = {
-            // Se pasan los datos de la seleccion del jugador al viewModel
-            myViewModel.procesarClick(color.id,context)
+            // Se pasan los datos de la selección del jugador al ViewModel
+            myViewModel.procesarClick(color.id, context)
         },
         modifier = Modifier
-            .padding(10.dp) // Margen externo del botón
-            .size(150.dp, 100.dp), // Dimensiones del botón
+            .padding(8.dp) // Margen externo reducido para mayor compacidad
+            .size(120.dp) // Botón cuadrado con tamaño uniforme
+            .shadow(6.dp, shape = RoundedCornerShape(16.dp)) // Sombra y bordes redondeados
+            .clip(RoundedCornerShape(16.dp)), // Recorta el botón con bordes redondeados
         colors = ButtonDefaults.buttonColors(
-            containerColor = Color.Gray, // Color de fondo del botón
-            contentColor = Color.White // Color del texto del botón
+            containerColor = color.color, // Usar el color definido en `Colores`
+            contentColor = Color.White // Texto en blanco para contraste
         )
     ) {
-        Text(text = "..."+color.nombre)
+        Text(
+            text = color.nombre.uppercase(), // Texto en mayúsculas para uniformidad
+            fontSize = 16.sp, // Tamaño del texto equilibrado
+            fontWeight = FontWeight.Bold, // Negrita para énfasis
+            textAlign = TextAlign.Center // Texto centrado dentro del botón
+        )
     }
+
 }
 
 @SuppressLint("CoroutineCreationDuringComposition", "MutableCollectionMutableState")
