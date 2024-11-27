@@ -146,9 +146,20 @@ fun BotoNormal(
         estado = myViewModel.estadoLiveData.value!!.boton_activo
     }
 
+    // Variable observer
+    var estado2 by remember { mutableStateOf(myViewModel.estadoLiveData.value!!.boton_activo) }
+
+    // Set context
+    myViewModel.estadoLiveData.observe(LocalLifecycleOwner.current) {
+        estado2 = myViewModel.estadoLiveData.value!!.start_activo
+    }
+    var estadoB = false
+    if (estado.not() && estado2.not()) estadoB = true
+
+
     // Definición del botón
     Button(
-        enabled = estado, // Estado del botón (activo/inactivo)
+        enabled = estadoB, // Estado del botón (activo/inactivo)
         onClick = {
             // Se pasan los datos de la selección del jugador al ViewModel
             myViewModel.procesarClick(color.id, context)
@@ -253,7 +264,7 @@ fun Secuence(myViewModel: MyViewModel) {
     val coroutineScope = rememberCoroutineScope()
 
     // Si el juego está en estado activo, 'start_activo' es falso y la secuencia aún no se ha mostrado
-    if (estado && !estadoStart && isPrinted == false) {
+    if (estado && estadoStart.not() && isPrinted == false) {
         coroutineScope.launch {
             colorearSecuencia()  // Iniciar la secuencia de colores
         }
