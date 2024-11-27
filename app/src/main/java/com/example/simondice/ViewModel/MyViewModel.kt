@@ -27,6 +27,7 @@ class MyViewModel(): ViewModel() {
     // Constructor
     init {
         Log.d(TAG_LOG,"viewModel iniciando")
+        Log.d(TAG_LOG,"ESTADO: "+estadoLiveData.value?.start_activo)
     }
 
     private fun incrementarContador() {
@@ -34,7 +35,7 @@ class MyViewModel(): ViewModel() {
         counterLiveData.value?.intValue = counterLiveData.value?.intValue?.inc() ?: 0
     }
 
-    private fun generarNuevaSecuencia() {
+    fun generarNuevaSecuencia() {
         // Aumenta el contador
         incrementarContador()
 
@@ -47,7 +48,7 @@ class MyViewModel(): ViewModel() {
         setJugando()
     }
 
-    public fun procesarClick(botonId: Int, contexto: Context) {
+    fun procesarClick(botonId: Int, contexto: Context) {
         // Añade el botón seleccionado a la lista de suposiciones
         playerGuessLiveData.value?.add(botonId)
 
