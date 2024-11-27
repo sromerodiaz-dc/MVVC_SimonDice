@@ -2,8 +2,6 @@ package com.example.simondice.View
 
 import android.annotation.SuppressLint
 import android.content.Context
-import android.provider.CalendarContract.Colors
-import android.util.Log
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -11,13 +9,12 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
-import androidx.compose.material3.TextField
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -25,22 +22,36 @@ import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
+import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalLifecycleOwner
-import androidx.compose.ui.semantics.Role.Companion.Button
-import androidx.compose.ui.tooling.preview.Preview
+import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.example.simondice.Model.Colores
-import com.example.simondice.Model.Datos
 import com.example.simondice.ViewModel.MyViewModel
-import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 
 @Composable
+fun UI(myViewModel: MyViewModel) {
+    // Estructura principal
+    Column(
+        horizontalAlignment = Alignment.CenterHorizontally,
+        modifier = Modifier.fillMaxSize()
+    ) {
+        StartButton(myViewModel) // Botón de inicio
+        Secuence(myViewModel)    // Componente de secuencia (suponiendo que está implementado)
+    }
+}
+@Composable
 fun StartButton(myViewModel: MyViewModel) {
+    // Obtengo el contexto desde Compose
+    val context = LocalContext.current
+
     // Variable observer
     var estado by remember { mutableStateOf(myViewModel.estadoLiveData.value!!.boton_activo) }
 
@@ -63,28 +74,42 @@ fun StartButton(myViewModel: MyViewModel) {
         modifier = Modifier.fillMaxSize()
     ) {
         // Título
+        // Título del juego
         Text(
             text = "SIMON DICE",
-            fontSize = 30.sp,
-            modifier = Modifier.padding(vertical = 100.dp)
+            fontSize = 40.sp, // Incrementa el tamaño del texto
+            fontWeight = FontWeight.Bold, // Añade negrita para mayor énfasis
+            color = Color(0xFF6200EA), // Cambia el color a un morado vibrante
+            textAlign = TextAlign.Center, // Centra el texto
+            modifier = Modifier
+                .fillMaxWidth() // Asegura que el texto ocupe todo el ancho disponible
+                .padding(vertical = 50.dp) // Reduce el espacio vertical
         )
 
         // Botón de inicio
         TextButton(
             enabled = estado,
             onClick = {
-                // Lógica del botón aun por hacer
+                // Lógica del botón
             },
             modifier = Modifier
-                .padding(10.dp)
-                .size(100.dp, 100.dp),
+                .padding(20.dp) // Más espacio alrededor del botón
+                .size(150.dp, 150.dp) // Botón más grande para destacar
+                .shadow(elevation = 8.dp, shape = CircleShape) // Añade una sombra y forma circular
+                .clip(CircleShape), // Recorta el botón en forma circular
             colors = ButtonDefaults.buttonColors(
-                containerColor = Color.Gray,
-                contentColor = Color.White
+                containerColor = Color(0xFF03DAC5), // Color turquesa llamativo
+                contentColor = Color.White // Texto en blanco para buen contraste
             )
         ) {
-            Text(text = "INICIAR\n(ronda número: $ronda!)")
+            Text(
+                text = "INICIAR\n(ronda ${ronda.intValue})", // Formato más limpio del texto
+                fontSize = 18.sp, // Aumenta ligeramente el tamaño del texto
+                fontWeight = FontWeight.Bold, // Negrita para mejor visibilidad
+                textAlign = TextAlign.Center // Centra el texto dentro del botón
+            )
         }
+
 
         // Aquí puedes agregar otros componentes o estructuras
         Row(
@@ -93,9 +118,13 @@ fun StartButton(myViewModel: MyViewModel) {
         ) {
             Column {
                 // Columna 1: Botones u otros elementos
+                BotoNormal(color = Colores.BROWN, context = context, myViewModel = myViewModel)
+                BotoNormal(color = Colores.PINK, context = context, myViewModel = myViewModel)
             }
             Column {
                 // Columna 2: Botones u otros elementos
+                BotoNormal(color = Colores.GRAY, context = context, myViewModel = myViewModel)
+                BotoNormal(color = Colores.PURPLE, context = context, myViewModel = myViewModel)
             }
         }
     }
@@ -106,7 +135,6 @@ fun BotoNormal(
     color: Colores, // Objeto que contiene información del botón (nombre, id, color, etc.)
     context: Context, // Contexto para operaciones con ViewModel
     myViewModel: MyViewModel, // ViewModel para la lógica de negocio
-    colorDefault: Color = color.color // Objeto que contiene el color empleado
 ) {
     // Variable observer
     var estado by remember { mutableStateOf(myViewModel.estadoLiveData.value!!.boton_activo) }
@@ -120,7 +148,8 @@ fun BotoNormal(
     Button(
         enabled = estado, // Estado del botón (activo/inactivo)
         onClick = {
-            // Lógica del botón aún por implementar
+            // Se pasan los datos de la seleccion del jugador al viewModel
+            myViewModel.procesarClick(color.id,context)
         },
         modifier = Modifier
             .padding(10.dp) // Margen externo del botón
@@ -136,10 +165,7 @@ fun BotoNormal(
 
 @SuppressLint("CoroutineCreationDuringComposition", "MutableCollectionMutableState")
 @Composable
-fun secuence(myViewModel: MyViewModel) {
-    // Contexto local para acceder a recursos y estados de ciclo de vida
-    val context = LocalContext.current
-
+fun Secuence(myViewModel: MyViewModel) {
     // Colores de los botones que cambiarán durante el juego
     val redButtonColor = remember { mutableStateOf(Colores.RED.color) }
     val blueButtonColor = remember { mutableStateOf(Colores.BLUE.color) }
@@ -217,7 +243,7 @@ fun secuence(myViewModel: MyViewModel) {
     val coroutineScope = rememberCoroutineScope()
 
     // Si el juego está en estado activo, 'start_activo' es falso y la secuencia aún no se ha mostrado
-    if (estado && !estadoStart && isPrinted.equals(false)) {
+    if (estado && !estadoStart && isPrinted == false) {
         coroutineScope.launch {
             colorearSecuencia()  // Iniciar la secuencia de colores
         }
